@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -115,6 +116,30 @@ func (c *client) IssuesByQuery(query_id int) ([]Issue, error) {
 
 func (c *client) Issues() ([]Issue, error) {
 	res, err := c.Get(c.endpoint + "/issues.json?key=" + c.apikey)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	decoder := json.NewDecoder(res.Body)
+	var r issuesResult
+	if res.StatusCode != 200 {
+		var er errorsResult
+		err = decoder.Decode(&er)
+		if err == nil {
+			err = errors.New(strings.Join(er.Errors, "\n"))
+		}
+	} else {
+		err = decoder.Decode(&r)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return r.Issues, nil
+}
+
+func (c *client) FilterIssues(field, value string) ([]Issue, error) {
+	res, err := c.Get(c.endpoint + "/issues.json?key=" + c.apikey + "&amp;" + url.QueryEscape(field) + "=" + url.QueryEscape(value))
 	if err != nil {
 		return nil, err
 	}

@@ -149,7 +149,7 @@ func (c *client) FilterIssues(filters ...IssueFilter) ([]Issue, error) {
 
 	var route = c.endpoint + "/issues.json?key=" + c.apikey
 	for f := range filters {
-		route = "&" + url.QueryEscape(filters[f].Key) + "=" + url.QueryEscape(filters[f].Value)
+		route += "&" + url.QueryEscape(filters[f].Key) + "=" + url.QueryEscape(filters[f].Value)
 	}
 
 	res, err := c.Get(route)

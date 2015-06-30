@@ -39,6 +39,10 @@ type Issue struct {
 	UpdatedOn   string  `json:"updated_on"`
 }
 
+type IssueFilter struct {
+	Key, Value string
+}
+
 func (c *client) IssuesOf(projectId int) ([]Issue, error) {
 	res, err := c.Get(c.endpoint + "/issues.json?project_id=" + strconv.Itoa(projectId) + "&key=" + c.apikey)
 	if err != nil {
@@ -138,8 +142,17 @@ func (c *client) Issues() ([]Issue, error) {
 	return r.Issues, nil
 }
 
-func (c *client) FilterIssues(field, value string) ([]Issue, error) {
-	res, err := c.Get(c.endpoint + "/issues.json?key=" + c.apikey + "&amp;" + url.QueryEscape(field) + "=" + url.QueryEscape(value))
+func (c *client) FilterIssues(filters ...IssueFilter) ([]Issue, error) {
+	if len(filters) < 1 {
+		return c.Issues()
+	}
+
+	var route = c.endpoint + "/issues.json?key=" + c.apikey
+	for f := range filters {
+		route = "&" + url.QueryEscape(filters[f].Key) + "=" + url.QueryEscape(filters[f].Value)
+	}
+
+	res, err := c.Get(route)
 	if err != nil {
 		return nil, err
 	}

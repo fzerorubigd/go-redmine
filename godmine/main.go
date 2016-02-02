@@ -6,7 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/mattn/go-redmine"
+	"github.com/fzerorubigd/go-redmine"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
